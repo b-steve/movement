@@ -16,7 +16,7 @@ sim.movement <- function(n, kappa, a, b, e){
   x <- c(0, 0)
   X[1, ] <- x
   phi <- 0
-  for (i in 1:n){
+  for (i in 2:(n + 1)){
     ## Calculate new bearing
     mu <- rvm(1, mean = pi, k = kappa) - pi
     phi <- phi + mu
@@ -39,7 +39,7 @@ sim.movement <- function(n, kappa, a, b, e){
 }
 
 ## Simulate data
-locs <- sim.movement(n = 100, kappa = 3, a = 20, b = 8, e = 15)
+locs <- sim.movement(n = 100, kappa = 700, a = 20, b = 8, e = 25)
 ## Plot both observed (black) and actual (blue) locations
 xlim <- range(sapply(locs, function(x) range(x[, 1])))
 ylim <- range(sapply(locs, function(x) range(x[, 2])))
