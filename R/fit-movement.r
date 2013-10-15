@@ -19,6 +19,7 @@ write_pin("movement", list(kappa = 6, a = 25, b = 15, sigma = 15, x = Xobs))
 run_admb("movement", verbose = FALSE, extra.args = "-noinit")
 fit <- read_admb("movement")
 clean_admb("movement")
+file.remove("movement.dat", "movement.pin")
 ## Look at gradient and fit summary
 fit$maxgrad
 summary(fit)
