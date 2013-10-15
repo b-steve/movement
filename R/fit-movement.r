@@ -1,21 +1,25 @@
-set.seed(5434)
+set.seed(5439)
 library(R2admb)
 source("sim-movement.r")
+## True parameter values
 n <- 20
-kappa <- 3.5
+kappa <- 6
 a <- 20
 b <- 15
 sigma <- 10
+## Simulate the data
 locs <- sim.movement(n = n, kappa = kappa, a = a, b = b, sigma = sigma)
-
 Xobs <- locs$Xobs[-1, ]
+## Generate ADMB .dat and .pin files
 write_dat("movement", list(n = n, x_obs = Xobs))
-write_pin("movement", list(kappa = kappa, a = a, b = b, sigma = sigma, x = Xobs))
+## Set start values here
+write_pin("movement", list(kappa = 6, a = 25, b = 15, sigma = 15, x = Xobs))
+## No need to compile yourself
 ##compile_admb("movement", safe = TRUE, re = TRUE, verbose = TRUE)
 run_admb("movement", verbose = FALSE, extra.args = "-noinit")
 fit <- read_admb("movement")
 clean_admb("movement")
-
+## Look at gradient and fit summary
 fit$maxgrad
 summary(fit)
 
@@ -33,16 +37,13 @@ points(locs$Xobs)
 lines(xs, ys, col = "red")
 points(xs, ys, col = "red")
 
-
 ## Model summary:
 ##
 ## Model file: movement
-## Negative log-likelihood:  119.7 	 AIC:  231.4
+## Negative log-likelihood:  116.1 	 AIC:  224.2
 ## Coefficients:
 ##       Estimate Std. Error z value Pr(>|z|)
-## kappa    6.882      3.979   1.730   0.0837 .
-## a       17.698      2.595   6.819 9.16e-12 ***
-## b       11.051      2.642   4.183 2.88e-05 ***
-## sigma   11.532      1.839   6.272 3.57e-10 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## kappa   11.126      6.574   1.693  0.09055 .
+## a       15.532      1.859   8.354  < 2e-16 ***
+## b        7.772      2.680   2.900  0.00373 **
+## sigma   11.780      1.615   7.296 2.96e-13 ***
