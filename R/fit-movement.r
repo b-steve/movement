@@ -16,7 +16,7 @@ write_dat("movement", list(n = n, x_obs = Xobs))
 write_pin("movement", list(kappa = 6, a = 25, b = 15, sigma = 15, x = Xobs))
 ## No need to compile yourself
 ##compile_admb("movement", safe = TRUE, re = TRUE, verbose = TRUE)
-run_admb("movement", verbose = FALSE, extra.args = "-noinit")
+run_admb("movement", verbose = TRUE, extra.args = "-noinit -l1 1000000000 -l2 1000000000 -l3 1000000000 -nl1 1000000000 -nl2 100000000 -cbs 1000000")
 fit <- read_admb("movement")
 clean_admb("movement")
 file.remove("movement.dat", "movement.pin")
@@ -26,6 +26,7 @@ summary(fit)
 
 ## Plotting location point estimates (red) with observed locations
 ## (black) and actual locations (blue)
+pdf(file = "locs.pdf")
 coords <- coef(fit, type = "random")
 xs <- coords[c(TRUE, FALSE)]
 ys <- coords[c(FALSE, TRUE)]
@@ -37,6 +38,7 @@ lines(locs$Xobs)
 points(locs$Xobs)
 lines(xs, ys, col = "red")
 points(xs, ys, col = "red")
+dev.off()
 
 ## Model summary:
 ##
