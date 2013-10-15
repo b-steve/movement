@@ -2,14 +2,17 @@
 #'
 #' Simulates movement model data.
 #'
+#' Note that original animal location is (0, 0), and that original bearing is also 0.
+#'
 #' @param n Number of points to simulate.
 #' @param kappa Concentration parameter for the Von-Mises distribution.
 #' @param a Mean step length for the gamma distribution.
 #' @param b Step length standard deviation for the gamma distribution.
 #' @param e Measurement error standard deviation for the bivariate normal distribution.
-#' @param phi0 Initial bearing.
+#' @return A list with two components: \code{X} is a matrix that contains actual animal
+#' locations, \code{Xobs} contains observed locations.
 
-sim.movement <- function(n, kappa, a, b, e){
+sim.movement <- function(n, kappa, a, b, sigma){
   library(CircStats)
   X <- matrix(0, nrow = n + 1, ncol = 2)
   ## Start location is (0, 0); Original bearing is 0
@@ -33,17 +36,8 @@ sim.movement <- function(n, kappa, a, b, e){
     x <- x + x.delta
     X[i, ] <- x
   }
-  error <- matrix(rnorm(2*(n + 1), mean = 0, sd = e), nrow = n + 1, ncol = 2)
+  error <- matrix(rnorm(2*(n + 1), mean = 0, sd = sigma), nrow = n + 1, ncol = 2)
   Xobs <- X + error
   list(X = X, Xobs = Xobs)
 }
 
-## Simulate data
-locs <- sim.movement(n = 100, kappa = 700, a = 20, b = 8, e = 25)
-## Plot both observed (black) and actual (blue) locations
-xlim <- range(sapply(locs, function(x) range(x[, 1])))
-ylim <- range(sapply(locs, function(x) range(x[, 2])))
-plot(locs$X, type = "l", xlim = xlim, ylim = ylim, asp = 1, col = "blue")
-points(locs$X, col = "blue")
-lines(locs$Xobs)
-points(locs$Xobs)
