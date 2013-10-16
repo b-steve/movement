@@ -62,7 +62,7 @@ fit.movement <- function(Xobs, sv, dir = "."){
   write_pin("movement", sv)
   run_admb("movement", extra.args = "-noinit -l1 1000000000 -l2 1000000000 -l3 1000000000 -nl1 1000000000 -nl2 100000000 -cbs 1000000")
   fit <- read_admb("movement")
-  clean_admb("")
+  clean_admb("movement")
   file.remove("movement.dat", "movement.pin")
   fit$Xobs <- Xobs
   setwd(currwd)
