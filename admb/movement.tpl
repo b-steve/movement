@@ -4,12 +4,17 @@ DATA_SECTION
 
 PARAMETER_SECTION
   init_bounded_number kappa(0,650,1)
-  init_bounded_number a(0,100,1)
-  init_bounded_number b(0,50,1)
-  init_bounded_number sigma(0,50,1)
+  init_bounded_number a(0,1000,1)
+  init_bounded_number b(0,1000,1)
+  init_bounded_number sigma(0,1000,1)
   random_effects_matrix x(1,n,1,2,1)
   number x_diff
   number y_diff
+  number sign_x_diff
+  number sign_y_diff
+  number x_dummy
+  number y_dummy
+  number both_dummy
   number x_error
   number y_error
   number dist
@@ -35,19 +40,27 @@ PROCEDURE_SECTION
       y_diff = x(i, 2) - x(i - 1, 2);
       old_bear = bear;
     }
+    sign_x_diff = x_diff/fabs(x_diff);
+    sign_y_diff = y_diff/fabs(y_diff);
     // Calculating distance moved
     dist = sqrt(square(x_diff) + square(y_diff));
     // Subtracting log density of gamma distribution
     alpha = square(a)/square(b);
     beta = a/square(b);
     f -= alpha*log(beta) + (alpha - 1)*log(dist) - (beta*dist) - gammln(alpha);
+    // Calculating dummy variables
+    // x_dummy is 1 if x_diff is positive and y_diff is negative
+    x_dummy = (sign_x_diff - sign_y_diff)*(sign_x_diff + square(sign_y_diff))/4;
+    // y_dummy is 1 if x_diff is negative and y_diff is positive
+    y_dummy = (sign_y_diff - sign_x_diff)*(sign_y_diff + square(sign_x_diff))/4;
+    // both_dummy is 1 if both x_diff and y_diff are negative
+    both_dummy = (-sign_x_diff - sign_y_diff)*(square(sign_x_diff) - sign_y_diff)/4;
     // Calculating bearing
-    bear = atan(x_diff/y_diff);
-    if (value(y_diff) < 0){
-      bear += M_PI;
-    } else if (value(x_diff) < 0){
-      bear += 2*M_PI;
-    }
+    bear = asin(x_diff/dist);
+    // Adjustments depending on the bearing's quadrant
+    bear += x_dummy*2*(0.5*M_PI - bear);
+    bear += y_dummy*2.0*M_PI;
+    bear += both_dummy*(M_PI - 2.0*bear);
     // Subtracting log density of von-Mises distribution
     // Working out bessel function
     ax = fabs(kappa);	  
@@ -67,7 +80,6 @@ PROCEDURE_SECTION
     f -= -0.5*log(2*M_PI) - log(sigma) - square(x_error)/(2*square(sigma));
     f -= -0.5*log(2*M_PI) - log(sigma) - square(y_error)/(2*square(sigma));
   }
-  cout << "kappa: " << kappa << ", a: " << a << ", b: " << b << ", sigma:" << sigma << ", f: " << f << endl;
 
 TOP_OF_MAIN_SECTION
   arrmblsize=150000000L;
