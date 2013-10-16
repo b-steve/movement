@@ -52,7 +52,7 @@ sim.movement <- function(n, kappa, a, b, sigma){
 #' @param sv A list of start values. Each component corresponds to a parameter and
 #' is named as such.
 #' @param dir Directory containing admb movement executable.
-fit.movement <- function(Xobs, sv, dir = "."){
+fit.movement <- function(Xobs, sv, dir = ".", clean = TRUE){
   library(R2admb)
   currwd <- getwd()
   setwd(dir)
@@ -62,8 +62,10 @@ fit.movement <- function(Xobs, sv, dir = "."){
   write_pin("movement", sv)
   run_admb("movement", extra.args = "-noinit -l1 1000000000 -l2 1000000000 -l3 1000000000 -nl1 1000000000 -nl2 100000000 -cbs 1000000")
   fit <- read_admb("movement")
-  clean_admb("movement")
-  file.remove("movement.dat", "movement.pin")
+  if (clean){
+    clean_admb("movement")
+    file.remove("movement.dat", "movement.pin")
+  }
   fit$Xobs <- Xobs
   setwd(currwd)
   fit
